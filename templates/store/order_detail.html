@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Order #{{ order.id }} - {{ shop_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="{% url 'store:order_list' %}">My Orders</a>
+    <span>/</span>
+    <span>Order #{{ order.id }}</span>
+</nav>
+
+<div class="order-success-banner">
+    <span class="success-icon">✓</span>
+    <div>
+        <h2>Order placed successfully!</h2>
+        <p>Thank you for shopping with {{ shop_name }}. Your order is being processed.</p>
+    </div>
+</div>
+
+<div class="order-detail">
+    <div class="order-detail-header">
+        <div>
+            <h1>Order #{{ order.id }}</h1>
+            <p class="order-date">Placed on {{ order.created_at|date:"d F Y \a\t h:i A" }}</p>
+        </div>
+        <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+
+    <div class="order-info-grid">
+        <div class="info-card">
+            <h3>📍 Delivery Address</h3>
+            <p>{{ order.shipping_address }}</p>
+        </div>
+        <div class="info-card">
+            <h3>📞 Contact</h3>
+            <p>+91 {{ order.phone }}</p>
+        </div>
+        <div class="info-card">
+            <h3>💵 Payment</h3>
+            <p>Cash on Delivery</p>
+        </div>
+    </div>
+
+    <h2>Order Items</h2>
+    <table class="order-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>
+                    <a href="{% url 'store:product_detail' item.product.slug %}">{{ item.product.name }}</a>
+                </td>
+                <td>{{ item.price|inr }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.subtotal|inr }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total Amount</strong></td>
+                <td><strong>{{ order.total|inr }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <a href="{% url 'store:product_list' %}" class="btn btn-primary">Continue Shopping</a>
+</div>
+{% endblock %}

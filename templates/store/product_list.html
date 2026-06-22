@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Shop Online - {{ shop_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <span class="hero-badge">🇮🇳 Made for India</span>
+        <h1>Everything You Need,<br><span class="hero-highlight">Delivered to Your Door</span></h1>
+        <p>Discover top deals on electronics, fashion, home & sports — with free delivery above ₹{{ free_delivery_min }}.</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <strong>10K+</strong>
+                <span>Happy Customers</span>
+            </div>
+            <div class="stat">
+                <strong>500+</strong>
+                <span>Products</span>
+            </div>
+            <div class="stat">
+                <strong>4.8★</strong>
+                <span>Average Rating</span>
+            </div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-card">
+            <span class="hero-card-tag">Today's Deal</span>
+            <p>Up to <strong>40% off</strong> on Electronics</p>
+            <a href="{% url 'store:product_list' %}?category=electronics" class="btn btn-accent">Shop Now</a>
+        </div>
+    </div>
+</section>
+
+{% if categories %}
+<div class="category-strip">
+    <a href="{% url 'store:product_list' %}" class="category-chip {% if not active_category %}active{% endif %}">All</a>
+    {% for cat in categories %}
+    <a href="{% url 'store:product_list' %}?category={{ cat.slug }}" class="category-chip {% if active_category == cat.slug %}active{% endif %}">
+        {{ cat.name }}
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if products %}
+<div class="section-header">
+    <h2>{% if search_query %}Results for "{{ search_query }}"{% elif active_category %}Filtered Products{% else %}Trending Products{% endif %}</h2>
+    <span class="product-count">{{ products|length }} items</span>
+</div>
+
+<div class="product-grid">
+    {% for product in products %}
+    <article class="product-card">
+        <a href="{% url 'store:product_detail' product.slug %}" class="product-image-link">
+            <div class="product-image">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy">
+                {% else %}
+                <div class="product-placeholder">{{ product.name|truncatechars:1 }}</div>
+                {% endif %}
+                {% if product.price >= free_delivery_min %}
+                <span class="product-badge free-delivery">FREE Delivery</span>
+                {% endif %}
+            </div>
+        </a>
+        <div class="product-info">
+            {% if product.category %}
+            <span class="product-category">{{ product.category.name }}</span>
+            {% endif %}
+            <h3><a href="{% url 'store:product_detail' product.slug %}">{{ product.name }}</a></h3>
+            <div class="product-rating">
+                <span class="stars">★★★★★</span>
+                <span class="rating-count">({{ forloop.counter|add:120 }})</span>
+            </div>
+            <div class="product-pricing">
+                <span class="price">{{ product.price|inr }}</span>
+                {% widthratio product.price 100 115 as mrp %}
+                <span class="price-mrp">{{ mrp|inr }}</span>
+                <span class="price-off">{% widthratio product.price 100 13 as off %}{{ off|floatformat:0 }}% off</span>
+            </div>
+            <div class="product-footer">
+                <form method="post" action="{% url 'store:cart_add' product.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-primary btn-cart">Add to Cart</button>
+                </form>
+            </div>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>No products found</h2>
+    <p>Try a different search or browse all categories.</p>
+    <a href="{% url 'store:product_list' %}" class="btn btn-primary">View All Products</a>
+</div>
+{% endif %}
+{% endblock %}

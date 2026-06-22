@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ shop_name }}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="promo-bar">
+        <div class="container promo-inner">
+            <span>🚚 Free delivery on orders above ₹{{ free_delivery_min }}</span>
+            <span class="promo-divider">|</span>
+            <span>💳 Cash on Delivery available</span>
+            <span class="promo-divider">|</span>
+            <span>🔒 100% secure payments</span>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="{% url 'store:product_list' %}" class="logo">
+                <span class="logo-mark">D</span>
+                <span class="logo-text">
+                    <strong>{{ shop_name }}</strong>
+                    <small>{{ shop_tagline }}</small>
+                </span>
+            </a>
+
+            <form class="header-search" method="get" action="{% url 'store:product_list' %}">
+                <input type="text" name="q" placeholder="Search for products, brands and more..." aria-label="Search products">
+                <button type="submit" class="btn btn-search">Search</button>
+            </form>
+
+            <nav class="nav">
+                {% if user.is_authenticated %}
+                <a href="{% url 'store:order_list' %}" class="nav-item">
+                    <span class="nav-icon">📦</span>
+                    <span>Orders</span>
+                </a>
+                <span class="user-greeting">Hi, {{ user.username }}</span>
+                <a href="{% url 'store:logout' %}" class="nav-item">Logout</a>
+                {% else %}
+                <a href="{% url 'store:login' %}" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Login</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'store:cart' %}" class="nav-item cart-link">
+                    <span class="nav-icon">🛒</span>
+                    <span>Cart</span>
+                    {% if cart|length %}
+                    <span class="cart-badge">{{ cart|length }}</span>
+                    {% endif %}
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'store:register' %}" class="btn btn-sm btn-accent">Sign Up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="container messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="main">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <a href="{% url 'store:product_list' %}" class="logo footer-logo">
+                    <span class="logo-mark">D</span>
+                    <strong>{{ shop_name }}</strong>
+                </a>
+                <p>Your trusted online marketplace for electronics, fashion, home essentials and more — delivered across India.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="{% url 'store:product_list' %}">All Products</a>
+                <a href="{% url 'store:cart' %}">My Cart</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'store:order_list' %}">My Orders</a>
+                {% else %}
+                <a href="{% url 'store:register' %}">Create Account</a>
+                {% endif %}
+            </div>
+            <div class="footer-trust">
+                <h4>Why {{ shop_name }}?</h4>
+                <div class="trust-badges">
+                    <span>✓ Genuine Products</span>
+                    <span>✓ Easy Returns</span>
+                    <span>✓ Fast Delivery</span>
+                    <span>✓ COD Available</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 {{ shop_name }}. All rights reserved. Made for India 🇮🇳</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

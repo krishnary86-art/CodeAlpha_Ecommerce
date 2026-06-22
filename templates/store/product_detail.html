@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}{{ product.name }} - {{ shop_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="{% url 'store:product_list' %}">Home</a>
+    <span>/</span>
+    {% if product.category %}
+    <a href="{% url 'store:product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a>
+    <span>/</span>
+    {% endif %}
+    <span>{{ product.name }}</span>
+</nav>
+
+<div class="product-detail">
+    <div class="product-detail-image">
+        {% if product.image_url %}
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+        {% else %}
+        <div class="product-placeholder large">{{ product.name|truncatechars:1 }}</div>
+        {% endif %}
+    </div>
+    <div class="product-detail-info">
+        {% if product.category %}
+        <span class="product-category">{{ product.category.name }}</span>
+        {% endif %}
+        <h1>{{ product.name }}</h1>
+        <div class="product-rating large">
+            <span class="stars">★★★★★</span>
+            <span class="rating-value">4.6</span>
+            <span class="rating-count">(2,847 ratings)</span>
+        </div>
+
+        <div class="product-pricing detail-pricing">
+            <span class="price large">{{ product.price|inr }}</span>
+            {% widthratio product.price 5 6 as mrp %}
+            <span class="price-mrp">{{ mrp|inr }}</span>
+            <span class="price-off">17% off</span>
+        </div>
+        <p class="tax-note">Inclusive of all taxes</p>
+
+        <div class="delivery-info">
+            {% if product.price >= free_delivery_min %}
+            <span class="delivery-badge">🚚 FREE Delivery</span>
+            {% else %}
+            <span class="delivery-badge muted">🚚 Standard delivery — FREE on orders above ₹{{ free_delivery_min }}</span>
+            {% endif %}
+            <span class="cod-badge">💵 Cash on Delivery available</span>
+        </div>
+
+        <p class="stock-info">
+            {% if product.stock > 0 %}
+            <span class="in-stock">✓ In Stock — {{ product.stock }} units left</span>
+            {% else %}
+            <span class="out-of-stock">Currently unavailable</span>
+            {% endif %}
+        </p>
+        <p class="description">{{ product.description }}</p>
+
+        {% if product.stock > 0 %}
+        <form method="post" action="{% url 'store:cart_add' product.id %}" class="add-to-cart-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'store:product_detail' product.slug %}">
+            <div class="quantity-selector">
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}">
+            </div>
+            <div class="detail-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+                <a href="{% url 'store:cart' %}" class="btn btn-accent btn-lg">Buy Now</a>
+            </div>
+        </form>
+        {% endif %}
+
+        <div class="product-highlights">
+            <div class="highlight"><span>🔄</span> 7-day easy returns</div>
+            <div class="highlight"><span>🛡️</span> 1-year warranty</div>
+            <div class="highlight"><span>📞</span> 24/7 customer support</div>
+        </div>
+    </div>
+</div>
+
+{% if related_products %}
+<section class="related-products">
+    <h2>Customers also viewed</h2>
+    <div class="product-grid">
+        {% for related in related_products %}
+        <article class="product-card">
+            <a href="{% url 'store:product_detail' related.slug %}" class="product-image-link">
+                <div class="product-image">
+                    {% if related.image_url %}
+                    <img src="{{ related.image_url }}" alt="{{ related.name }}" loading="lazy">
+                    {% else %}
+                    <div class="product-placeholder">{{ related.name|truncatechars:1 }}</div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="product-info">
+                <h3><a href="{% url 'store:product_detail' related.slug %}">{{ related.name }}</a></h3>
+                <span class="price">{{ related.price|inr }}</span>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
